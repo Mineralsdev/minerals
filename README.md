@@ -83,15 +83,15 @@ npx shadcn@latest add Mineralsdev/minerals/connect
 
 | Listing | Maker | Best for |
 |---|---|---|
-| <a href="https://www.fluidfunctionalism.com"><img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="20" height="20" alt=""> Fluid Functionalism</a> | @micka_design | Refined product interfaces with one consistent hover feel across buttons, tables, dialogs and sidebars. |
-| <a href="https://textures.dev/"><img src="https://minerals.dev/images/logos/textures.png" width="20" height="20" alt=""> Textures.dev</a> | Textures.dev | Animated, hover-reactive brand textures for websites. Each one is a single React component that coding agents like Claude Code, Cursor and Codex add to your project with one prompt. |
 | <a href="https://www.blossom-carousel.com/"><img src="https://minerals.dev/images/logos/blossom-carousel.png" width="20" height="20" alt=""> Blossom Carousel</a> | Jesper Vos | A carousel that keeps the browser's own scrolling and adds dragging with a mouse. Layout, snapping and spacing stay in your CSS. |
+| <a href="https://www.details.so/"><img src="https://minerals.dev/images/logos/details-so.png" width="20" height="20" alt=""> Details.so</a> | Details.so | Page transitions, parallax, small interface details. |
+| <a href="https://www.dialkit.dev"><img src="https://minerals.dev/images/logos/dialkit.png" width="20" height="20" alt=""> DialKit</a> | Josh Puckett | Tuning spacing, motion and colour live beside the interface. |
+| <a href="https://www.fluidfunctionalism.com"><img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="20" height="20" alt=""> Fluid Functionalism</a> | Micka | Refined product interfaces with one consistent hover feel across buttons, tables, dialogs and sidebars. |
 | <a href="https://libraries.dev/"><img src="https://minerals.dev/images/logos/libraries-dev.png" width="20" height="20" alt=""> Libraries.dev</a> | Jakub Antalik | Effects for AI interfaces in React: a glowing border while it streams, thinking orbs while it works, and voice and avatar pieces. |
 | <a href="https://sticky.jesperlandberg.com/"><img src="https://minerals.dev/images/logos/sticky.png" width="20" height="20" alt=""> Sticky Scroll</a> | Jesper Landberg | Sticky elements that ease into place and out again instead of stopping dead. One file, no dependencies. |
-| <a href="https://uiarc.dev/"><img src="https://minerals.dev/images/logos/arc.png" width="20" height="20" alt=""> UIArc</a> | Elia Kuratli | Animated components and blocks for marketing pages on shadcn and Next.js. |
-| <a href="https://www.details.so/"><img src="https://minerals.dev/images/logos/details-so.png" width="20" height="20" alt=""> Details.so</a> | Details.so | References from real websites, and copy-ready page transitions, preloaders and parallax. |
-| <a href="https://www.dialkit.dev"><img src="https://minerals.dev/images/logos/dialkit.png" width="20" height="20" alt=""> DialKit</a> | Josh Puckett | Tuning spacing, motion and colour live beside the interface. |
+| <a href="https://textures.dev/"><img src="https://minerals.dev/images/logos/textures.png" width="20" height="20" alt=""> Textures.dev</a> | Textures.dev | Animated, hover-reactive brand textures for websites. Each one is a single React component that coding agents like Claude Code, Cursor and Codex add to your project with one prompt. |
 | <a href="https://twombly.app"><img src="https://minerals.dev/images/logos/twombly.png" width="20" height="20" alt=""> Twombly</a> | Materic, Inc. | Sharing a prototype or an agent's design explorations with other people to compare, review and give feedback on a shared canvas. |
+| <a href="https://uiarc.dev/"><img src="https://minerals.dev/images/logos/arc.png" width="20" height="20" alt=""> UIArc</a> | Elia Kuratli | Animated components and blocks for marketing pages on shadcn and Next.js. |
 
 The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 
@@ -101,9 +101,23 @@ The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 |---|---|
 | `find_design` | Searches the Minerals shelf of design libraries and tools. |
 | `get_listing` | Returns the pull for a ref from find_design. |
-| `report_outcome` | Records whether what get_listing returned was used. |
+| `report_outcome` | Records that what get_listing returned was not used after all. |
 | `offer` | Gives the exact words for one choice, Yes or Not now, about one free item or one listing. |
 | `suggest_listing` | Sends a proposal for a design library or tool to the Minerals curator. |
+
+A search takes up to three needs, separated by commas. `get_listing` takes up to eight refs, separated by commas. A report is only for a pull that was not used after all: a pull that went through needs none.
+
+After a pull your agent says one line, the receipt: "Added <item> from <listing> by <maker>. Via Minerals." Once per project it then asks whether Minerals should be the default for design in the repo. Yes adds one line to the repo's agent file; Not now is remembered.
+
+## The command
+
+An item that is pulled as a registry file comes with one command:
+
+```bash
+npx -y minerals@1 add arc/hero-section
+```
+
+It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it, and records the pull under `installed` in `minerals.json`. It never replaces a file that exists unless it is run with `--overwrite`, and it stops when a file has changed since it was checked unless it is run with `--allow-changed`. Its source is in [`cli/`](cli).
 
 ## What is sent, what is fetched
 
