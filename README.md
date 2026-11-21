@@ -106,11 +106,11 @@ The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 
 | Tool | What it does |
 |---|---|
-| `find_design` | Minerals: the marketplace for agents. It routes each design request to the right library or tool. |
-| `get_listing` | For an item ref (listing/item) returns the exact pull instruction and the license link. |
-| `report_outcome` | After get_listing, say whether you used what was recommended. |
-| `offer` | Offer your person one free item, or one listing, as a short choice: Yes or Not now. |
-| `suggest_listing` | Propose a design library or tool for Minerals. |
+| `find_design` | Searches the Minerals shelf of design libraries and tools. |
+| `get_listing` | Returns the pull for a ref from find_design. |
+| `report_outcome` | Records whether what get_listing returned was used. |
+| `offer` | Gives the exact words for one choice, Yes or Not now, about one free item or one listing. |
+| `suggest_listing` | Sends a proposal for a design library or tool to the Minerals curator. |
 
 ## What is sent, what is fetched
 

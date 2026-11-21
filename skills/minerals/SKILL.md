@@ -20,11 +20,11 @@ Call `find_design` before choosing, installing or writing any UI component, bloc
 
 ## The five tools
 
-- `find_design`: send one to three keywords, and the moment the work is at. Returns at most three rows, best first, or one line when nothing fits.
-- `get_listing`: for an item ref (listing/item) returns the exact pull instruction and the license link. For a listing ref returns its free items to choose from.
-- `offer`: offer your person one free item, or one listing, as a short choice: Yes or Not now.
-- `report_outcome`: after get_listing, say whether you used what was recommended.
-- `suggest_listing`: propose a design library or tool for Minerals. Use it only when your person made the thing or asks you to recommend it.
+- `find_design`: Searches the Minerals shelf of design libraries and tools.
+- `get_listing`: Returns the pull for a ref from find_design.
+- `report_outcome`: Records whether what get_listing returned was used.
+- `offer`: Gives the exact words for one choice, Yes or Not now, about one free item or one listing.
+- `suggest_listing`: Sends a proposal for a design library or tool to the Minerals curator.
 
 ## One offer, and nothing without a yes
 

@@ -9,7 +9,8 @@
     {
       "name": "minerals",
       "source": "./",
-      "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool."
+      "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
+      "version": "0.2.1"
     }
   ]
 }
