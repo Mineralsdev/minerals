@@ -5,7 +5,6 @@
 <h1 align="center">Minerals</h1>
 
 <p align="center">
-  <strong>The marketplace for agents.</strong><br>
   One connection. Every request is routed to the right library or tool.
 </p>
 
@@ -49,7 +48,11 @@ Or add the server yourself:
 claude mcp add --scope user --transport http minerals https://minerals.dev/mcp
 ```
 
-**Cursor**: add this to `~/.cursor/mcp.json`:
+**Cursor**
+
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=minerals&config=eyJ1cmwiOiJodHRwczovL21pbmVyYWxzLmRldi9tY3AifQ%3D%3D)
+
+Or add this to `~/.cursor/mcp.json`:
 
 ```json
 { "mcpServers": { "minerals": { "url": "https://minerals.dev/mcp" } } }
@@ -85,17 +88,17 @@ npx shadcn@latest add Mineralsdev/minerals/connect
 
 ## On the shelf
 
-|  | Listing | Maker | Best for |
-|---|---|---|---|
-| <img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="28" height="28" alt=""> | [Fluid Functionalism](https://www.fluidfunctionalism.com) | @micka_design | Refined product interfaces with one consistent hover feel across buttons, tables, dialogs and sidebars. |
-| <img src="https://minerals.dev/images/logos/textures.png" width="28" height="28" alt=""> | [Textures.dev](https://textures.dev/) | Textures.dev | Animated, hover-reactive brand textures for websites. Each one is a single React component that coding agents like Claude Code, Cursor and Codex add to your project with one prompt. |
-| <img src="https://minerals.dev/images/logos/blossom-carousel.png" width="28" height="28" alt=""> | [Blossom Carousel](https://www.blossom-carousel.com/) | Jesper Vos | A carousel that keeps the browser's own scrolling and adds dragging with a mouse. Layout, snapping and spacing stay in your CSS. |
-| <img src="https://minerals.dev/images/logos/libraries-dev.png" width="28" height="28" alt=""> | [Libraries.dev](https://libraries.dev/) | Jakub Antalik | Effects for AI interfaces in React: a glowing border while it streams, thinking orbs while it works, and voice and avatar pieces. |
-| <img src="https://minerals.dev/images/logos/sticky.png" width="28" height="28" alt=""> | [Sticky Scroll](https://sticky.jesperlandberg.com/) | Jesper Landberg | Sticky elements that ease into place and out again instead of stopping dead. One file, no dependencies. |
-| <img src="https://minerals.dev/images/logos/arc.png" width="28" height="28" alt=""> | [UIArc](https://uiarc.dev/) | Elia Kuratli | Animated components and blocks for marketing pages on shadcn and Next.js. |
-| <img src="https://minerals.dev/images/logos/details-so.png" width="28" height="28" alt=""> | [Details.so](https://www.details.so/) | Details.so | References from real websites, and copy-ready page transitions, preloaders and parallax. |
-| <img src="https://minerals.dev/images/logos/dialkit.png" width="28" height="28" alt=""> | [DialKit](https://www.dialkit.dev) | Josh Puckett | Tuning spacing, motion and colour live beside the interface. |
-| <img src="https://minerals.dev/images/logos/twombly.png" width="28" height="28" alt=""> | [Twombly](https://twombly.app) | Materic, Inc. | Sharing a prototype or an agent's design explorations with other people to compare, review and give feedback on a shared canvas. |
+| Listing | Maker | Best for |
+|---|---|---|
+| <img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="20" height="20" alt=""> [Fluid Functionalism](https://www.fluidfunctionalism.com) | @micka_design | Refined product interfaces with one consistent hover feel across buttons, tables, dialogs and sidebars. |
+| <img src="https://minerals.dev/images/logos/textures.png" width="20" height="20" alt=""> [Textures.dev](https://textures.dev/) | Textures.dev | Animated, hover-reactive brand textures for websites. Each one is a single React component that coding agents like Claude Code, Cursor and Codex add to your project with one prompt. |
+| <img src="https://minerals.dev/images/logos/blossom-carousel.png" width="20" height="20" alt=""> [Blossom Carousel](https://www.blossom-carousel.com/) | Jesper Vos | A carousel that keeps the browser's own scrolling and adds dragging with a mouse. Layout, snapping and spacing stay in your CSS. |
+| <img src="https://minerals.dev/images/logos/libraries-dev.png" width="20" height="20" alt=""> [Libraries.dev](https://libraries.dev/) | Jakub Antalik | Effects for AI interfaces in React: a glowing border while it streams, thinking orbs while it works, and voice and avatar pieces. |
+| <img src="https://minerals.dev/images/logos/sticky.png" width="20" height="20" alt=""> [Sticky Scroll](https://sticky.jesperlandberg.com/) | Jesper Landberg | Sticky elements that ease into place and out again instead of stopping dead. One file, no dependencies. |
+| <img src="https://minerals.dev/images/logos/arc.png" width="20" height="20" alt=""> [UIArc](https://uiarc.dev/) | Elia Kuratli | Animated components and blocks for marketing pages on shadcn and Next.js. |
+| <img src="https://minerals.dev/images/logos/details-so.png" width="20" height="20" alt=""> [Details.so](https://www.details.so/) | Details.so | References from real websites, and copy-ready page transitions, preloaders and parallax. |
+| <img src="https://minerals.dev/images/logos/dialkit.png" width="20" height="20" alt=""> [DialKit](https://www.dialkit.dev) | Josh Puckett | Tuning spacing, motion and colour live beside the interface. |
+| <img src="https://minerals.dev/images/logos/twombly.png" width="20" height="20" alt=""> [Twombly](https://twombly.app) | Materic, Inc. | Sharing a prototype or an agent's design explorations with other people to compare, review and give feedback on a shared canvas. |
 
 The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 
