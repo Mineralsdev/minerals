@@ -1,0 +1,15 @@
+{
+  "name": "minerals",
+  "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
+  "owner": {
+    "name": "Adurant Labs",
+    "email": "hello@minerals.dev"
+  },
+  "plugins": [
+    {
+      "name": "minerals",
+      "source": "./",
+      "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool."
+    }
+  ]
+}

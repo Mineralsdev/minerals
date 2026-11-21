@@ -1,0 +1,12 @@
+{
+  "name": "minerals",
+  "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Adurant Labs",
+    "email": "hello@minerals.dev"
+  },
+  "homepage": "https://minerals.dev",
+  "repository": "https://github.com/Mineralsdev/minerals",
+  "license": "MIT"
+}

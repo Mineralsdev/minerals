@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "minerals",
+  "homepage": "https://minerals.dev",
+  "items": [
+    {
+      "name": "connect",
+      "type": "registry:file",
+      "title": "Minerals",
+      "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
+      "files": [
+        {
+          "path": "skills/minerals/SKILL.md",
+          "type": "registry:file",
+          "target": "~/.claude/skills/minerals/SKILL.md"
+        }
+      ]
+    }
+  ]
+}

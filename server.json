@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "dev.minerals/minerals",
+  "title": "Minerals",
+  "description": "The marketplace for agents. It routes each design request to the right library or tool.",
+  "version": "0.2.0",
+  "websiteUrl": "https://minerals.dev",
+  "repository": {
+    "url": "https://github.com/Mineralsdev/minerals",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://minerals.dev/mcp"
+    }
+  ]
+}
