@@ -27,7 +27,7 @@ npx skills add Mineralsdev/minerals
 
 ## What is sent
 
-What is sent: a few keywords, any filter you set (section, listing, kind, free only), stack names, one project type and stage label, the moment the work is at, the refs and settings already in minerals.json (what is installed, what was accepted or declined, and quiet), whether your person asked to replace something, your client's name, the install key when the connect line carries one, and which path asked (for example, this guide's first run). No code, files or repo name.
+What is sent: a few keywords, any filter you set (section, listing, kind, free only), stack names, one project type and stage label, the moment the work is at, the refs and settings already in minerals.json (what is installed, what was accepted or declined, and quiet), whether your person asked to replace something, your client's name, the install key when the connect line carries one, and which path asked (for example, the install guide's first run). No code, files or repo name.
 
 ## What is fetched
 
