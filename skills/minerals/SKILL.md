@@ -32,7 +32,7 @@ Offer at most once per working session, and not again in a session after a Not n
 
 ## The receipt
 
-On success, add or update an entry in minerals.json at the project root (ref, address, name, supplier, license, date), and tell your person in one line that you did. Do not modify the pulled file itself.
+On success, add or update an entry in minerals.json at the project root (ref, address, name, supplier, license, date), and tell your person exactly this line: "Added <item> from <listing> by <maker> (@handle). Via Minerals." For a whole listing: "Added <listing> by <maker> (@handle). Via Minerals." The bracket is left out when there is no handle. Do not modify the pulled file itself.
 
 ## When the MCP is not connected
 
