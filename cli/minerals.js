@@ -16,6 +16,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const SITE = 'https://minerals.dev'
+// shadcn is pinned to the major version this command was written against: it reads that version's dry run.
+const SHADCN = 'shadcn@4'
 const args = process.argv.slice(2)
 
 /** Stops with one sentence that says why, as the last line. */
@@ -29,24 +31,52 @@ const temporary = []
 function cleanUp() {
   for (const f of temporary.splice(0)) fs.rmSync(f, { force: true })
 }
-
-async function get(url) {
-  const res = await fetch(url, { redirect: 'follow' })
-  if (!res.ok) throw new Error(`${res.status} at ${url}`)
-  return Buffer.from(await res.arrayBuffer())
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => {
+    cleanUp()
+    process.exit(1)
+  })
 }
 
-/** Where a registry file's entry goes in a project without components.json. Null when it would leave the project folder, or land in a dot folder, a dot file or node_modules. */
+/** A supplier's text as it may be printed: no control characters, 200 characters at most. */
+const shown = (text) => String(text).replace(/[\x00-\x1f\x7f-\x9f]/g, ' ').split(String.fromCharCode(0x2028)).join(' ').split(String.fromCharCode(0x2029)).join(' ').slice(0, 200)
+
+/** One download, 20 seconds at most. A failure carries the status, or the reason in a few words. */
+async function get(url) {
+  let res
+  try {
+    res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(20000) })
+    if (res.ok) return Buffer.from(await res.arrayBuffer())
+  } catch (err) {
+    throw Object.assign(new Error('no answer'), { why: err && err.name === 'TimeoutError' ? 'no answer in 20 seconds' : 'no connection' })
+  }
+  throw Object.assign(new Error(String(res.status)), { status: res.status, why: String(res.status) })
+}
+
+/**
+ * Where a registry file's entry goes in a project without components.json. Null when it would leave the project
+ * folder, also through a symlinked folder, or land in a dot folder, a dot file or node_modules.
+ */
 function placeOf(file, root) {
   const named = String(file.target || file.path || '')
   const mapped = named.replace(/^~\//, '').replace(/^@components\//, 'components/').replace(/^@ui\//, 'components/ui/').replace(/^@lib\//, 'lib/').replace(/^@hooks\//, 'hooks/')
   if (!mapped) return null
   const full = path.resolve(root, mapped)
   if (!full.startsWith(root + path.sep)) return null
-  // Never into a folder or file whose name starts with a dot (.git, .github, .env), and never into node_modules.
+  // Never into a folder or file whose name starts with a dot (.git, .github, .env), and never into node_modules, in any casing.
+  // A part with "~" or one that ends in a dot or a space can be another name for such a folder on Windows.
   const parts = path.relative(root, full).split(path.sep)
-  return parts.some((part) => part.startsWith('.') || part === 'node_modules') ? null : full
+  if (parts.some((part) => part.startsWith('.') || part.toLowerCase() === 'node_modules' || part.includes('~') || /[. ]$/.test(part))) return null
+  // The nearest folder that exists must really lie inside the project: a symlinked folder is not followed out of it.
+  let parent = path.dirname(full)
+  while (!fs.existsSync(parent)) parent = path.dirname(parent)
+  const real = fs.realpathSync(parent)
+  const realRoot = fs.realpathSync(root)
+  return real === realRoot || real.startsWith(realRoot + path.sep) ? full : null
 }
+
+/** Whether something is at a path. A symlink counts, also one that points nowhere. */
+const isThere = (p) => !!fs.lstatSync(p, { throwIfNoEntry: false })
 
 async function add() {
   const overwrite = args.includes('--overwrite')
@@ -54,20 +84,25 @@ async function add() {
   const refs = [...new Set(args.slice(1).filter((a) => !a.startsWith('--')).map((r) => r.toLowerCase()))]
   if (!refs.length) stop(1, 'Name at least one ref, for example: npx minerals add arc/hero-section')
   const root = process.cwd()
+  const notes = []
 
   // 1. Each item's record from Minerals.
   const records = []
   for (const ref of refs) {
     if (!/^[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*){1,3}$/.test(ref)) stop(1, `"${ref}" is not an item ref. An item ref looks like arc/hero-section.`)
+    let record
     try {
-      records.push(JSON.parse((await get(`${SITE}/api/record/${ref}`)).toString()))
-    } catch {
-      stop(1, `Minerals has no free item with the ref "${ref}".`)
+      record = JSON.parse((await get(`${SITE}/api/record/${ref}`)).toString())
+    } catch (err) {
+      if (err && err.status === 404) stop(1, `Minerals has no free item with the ref "${ref}".`)
+      stop(1, `Minerals could not be reached (${(err && err.why) || 'an answer that could not be read'}). Try again in a minute, or use the steps at ${SITE}/${ref}.md`)
     }
+    records.push({ ...record, asked: ref })
   }
 
   // 2. The file, through the pull address, so the pull is counted. On failure, the supplier's own address.
   // 3. Its SHA-256 against the one Minerals recorded.
+  let checked = 0
   for (const r of records) {
     let body
     try {
@@ -77,89 +112,142 @@ async function add() {
         if (!r.fallback) throw new Error('no fallback')
         body = await get(r.fallback)
       } catch {
-        stop(1, `The file for ${r.ref} could not be downloaded.`)
+        stop(1, `The file for ${r.asked} could not be downloaded.`)
       }
     }
-    if (r.sha256 && createHash('sha256').update(body).digest('hex') !== r.sha256 && !allowChanged) {
-      stop(3, `The file for ${r.ref} has changed since ${r.checked || 'it was checked'}. Nothing was installed; run again with --allow-changed to use it.`)
-    }
+    if (r.sha256 && createHash('sha256').update(body).digest('hex') !== r.sha256) {
+      const changed = `The file for ${r.asked} has changed since ${shown(r.checked || 'it was checked')}.`
+      if (!allowChanged) {
+        console.log(changed)
+        stop(3, 'Nothing was installed. Ask your person before running again with --allow-changed.')
+      }
+      notes.push(`${changed} It is used as it is now.`)
+    } else if (r.sha256) checked++
     try {
       r.file = JSON.parse(body.toString())
     } catch {
-      stop(1, `The file for ${r.ref} is not a registry file.`)
+      stop(1, `The file for ${r.asked} is not a registry file.`)
     }
-    r.temp = path.join(root, `.minerals-${r.ref.replace(/\//g, '-')}-${process.pid}.json`)
+    if (!r.file || typeof r.file !== 'object' || Array.isArray(r.file)) stop(1, `The file for ${r.asked} is not a registry file.`)
+    r.temp = path.join(root, `.minerals-${r.asked.replace(/\//g, '-')}-${process.pid}.json`)
     fs.writeFileSync(r.temp, body)
     temporary.push(r.temp)
   }
+  const list = (v) => (Array.isArray(v) ? v.map(String) : [])
+  const pulledIn = [...new Set(records.flatMap((r) => list(r.file.registryDependencies)))]
 
   // 4. Install.
   if (fs.existsSync(path.join(root, 'components.json'))) {
     const files = records.map((r) => `./${path.basename(r.temp)}`)
     // On Windows npx is a .cmd file, which Node only starts through a shell. Every argument here is this command's own: fixed words and file names made from refs that passed the check above.
     const shell = process.platform === 'win32'
-    const dry = spawnSync('npx', ['-y', 'shadcn@latest', 'add', ...files, '--dry-run'], { cwd: root, encoding: 'utf8', shell })
+    const dry = spawnSync('npx', ['-y', SHADCN, 'add', ...files, '--dry-run'], { cwd: root, encoding: 'utf8', shell, timeout: 120000 })
+    if (dry.error && dry.error.code === 'ETIMEDOUT') stop(1, 'The shadcn dry run did not finish in 2 minutes, so nothing was installed.')
     if (dry.status !== 0) stop(1, 'The shadcn dry run failed, so nothing was installed.')
-    // The dry run marks a file that exists and would be replaced with "~ <path> overwrite".
-    const would = [...`${dry.stdout}\n${dry.stderr}`.matchAll(/~\s+(\S+)\s+overwrite/g)].map((m) => m[1])
+    const said = `${dry.stdout}\n${dry.stderr}`
+    // The dry run of this shadcn version lists what it would do under "Files (n)". Without that, its answer is not trusted.
+    if (!/Files \(\d+\)/.test(said)) stop(1, `shadcn's answer could not be read, so nothing was installed. The steps are at ${SITE}/${records[0].asked}.md`)
+    // It marks a file that exists and would be replaced with "~ <path> overwrite".
+    const would = said.split('\n').map((line) => line.match(/~\s+(.+?)\s+overwrite\b/)).filter(Boolean).map((m) => m[1])
     if (would.length && !overwrite) {
       console.log('These files exist and would change:')
-      for (const f of would) console.log(`  ${f}`)
-      stop(2, 'Nothing was installed; run again with --overwrite to replace them.')
+      for (const f of would) console.log(`  ${shown(f)}`)
+      stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
     }
-    const run = spawnSync('npx', ['-y', 'shadcn@latest', 'add', ...files, '--yes', ...(overwrite ? ['--overwrite'] : [])], { cwd: root, stdio: 'inherit', shell })
+    const run = spawnSync('npx', ['-y', SHADCN, 'add', ...files, '--yes', ...(overwrite ? ['--overwrite'] : [])], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'], shell, timeout: 300000 })
+    if (run.error && run.error.code === 'ETIMEDOUT') stop(1, 'shadcn did not finish in 5 minutes. Look at what it wrote before running again.')
     if (run.status !== 0) stop(1, 'shadcn could not install the files.')
+    notes.push(`Checked against Minerals' hash: ${checked}.${pulledIn.length ? ` Not checked: ${pulledIn.length} ${pulledIn.length === 1 ? 'file' : 'files'} it pulls in.` : ''}`)
   } else {
     // Without components.json: the files each registry file names, never outside the project folder.
     const writes = []
     for (const r of records) {
-      for (const f of r.file.files || []) {
-        const to = placeOf(f, root)
-        if (!to) stop(1, `${r.ref} names a file outside the project folder, in a dot folder or in node_modules, so nothing was installed.`)
-        if (typeof f.content !== 'string') stop(1, `${r.ref} names a file without content, so nothing was installed.`)
+      for (const f of Array.isArray(r.file.files) ? r.file.files : []) {
+        const to = f && typeof f === 'object' ? placeOf(f, root) : null
+        if (!to) stop(1, `${r.asked} names a file outside the project folder, in a dot folder or in node_modules, so nothing was installed.`)
+        if (typeof f.content !== 'string') stop(1, `${r.asked} names a file without content, so nothing was installed.`)
         writes.push({ to, content: f.content })
       }
     }
-    const exist = writes.filter((w) => fs.existsSync(w.to)).map((w) => path.relative(root, w.to))
+    const exist = writes.filter((w) => isThere(w.to)).map((w) => path.relative(root, w.to))
     if (exist.length && !overwrite) {
       console.log('These files exist and would change:')
-      for (const f of exist) console.log(`  ${f}`)
-      stop(2, 'Nothing was installed; run again with --overwrite to replace them.')
+      for (const f of exist) console.log(`  ${shown(f)}`)
+      stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
     }
     for (const w of writes) {
       fs.mkdirSync(path.dirname(w.to), { recursive: true })
+      // A symlink at the place is replaced by the file, never written through.
+      if (isThere(w.to)) fs.rmSync(w.to, { force: true })
       fs.writeFileSync(w.to, w.content)
-      console.log(`Wrote ${path.relative(root, w.to)}`)
+      console.log(`Wrote ${shown(path.relative(root, w.to))}`)
     }
-    const needs = [...new Set(records.flatMap((r) => [...(r.file.dependencies || []), ...(r.file.registryDependencies || [])]))]
-    if (needs.length) console.log(`Not installed, because this project has no components.json: ${needs.join(', ')}`)
+    // What is still missing: packages, and the registry files this one depends on, by ref where Minerals lists them.
+    const packages = [...new Set(records.flatMap((r) => list(r.file.dependencies)))]
+    if (packages.length) notes.push(`Still needed: npm install ${packages.map(shown).join(' ')}`)
+    const listed = []
+    const other = []
+    await Promise.all(
+      pulledIn.map(async (address) => {
+        const from = records.find((r) => list(r.file.registryDependencies).includes(address))
+        const name = (address.match(/([a-z0-9][a-z0-9-]*)\.json$/i) || [])[1]
+        // A dependency at the supplier's own address may be listed too: its record must name exactly this address.
+        const guess = name && /^https:\/\//.test(address) ? `${from.asked.split('/')[0]}/${name.toLowerCase()}` : null
+        try {
+          if (!guess) throw new Error('no ref')
+          const known = JSON.parse((await get(`${SITE}/api/record/${guess}`)).toString())
+          if (known.fallback !== address) throw new Error('another file')
+          if (!refs.includes(guess)) listed.push(guess)
+        } catch {
+          other.push(address)
+        }
+      }),
+    )
+    if (listed.length) notes.push(`Also needed: npx -y minerals@1 add ${listed.sort().join(' ')}`)
+    if (other.length) notes.push(`Also needed, from the supplier: ${other.sort().map(shown).join(' ')}`)
+    notes.push(`Checked against Minerals' hash: ${checked}.`)
   }
 
-  // 5. minerals.json: one entry per item, added or updated.
+  // 5. minerals.json: one entry per item under "installed", added or updated. A file that cannot be read is left as it is.
   const at = path.join(root, 'minerals.json')
   let project = {}
-  try {
-    project = JSON.parse(fs.readFileSync(at, 'utf8'))
-  } catch {}
-  const list = Array.isArray(project.installed) ? 'installed' : Array.isArray(project.items) ? 'items' : 'installed'
-  const entries = Array.isArray(project[list]) ? project[list].filter((e) => e && typeof e === 'object') : []
-  const date = new Date().toISOString().slice(0, 10)
-  for (const r of records) {
-    const entry = { ref: r.ref, address: r.address, name: r.name, supplier: r.supplier, license: r.licence, date }
-    const i = entries.findIndex((e) => e.ref === r.ref)
-    if (i < 0) entries.push(entry)
-    else entries[i] = { ...entries[i], ...entry }
+  let readable = true
+  if (isThere(at)) {
+    try {
+      project = JSON.parse(fs.readFileSync(at, 'utf8'))
+    } catch {
+      readable = false
+    }
+    if (!project || typeof project !== 'object' || Array.isArray(project)) readable = false
   }
-  project[list] = entries
-  fs.writeFileSync(at, JSON.stringify(project, null, 2) + '\n')
+  if (readable && project.installed !== undefined && !Array.isArray(project.installed)) readable = false
+  if (!readable) {
+    notes.push('minerals.json could not be read, so this pull was not recorded in it.')
+  } else {
+    const entries = Array.isArray(project.installed) ? [...project.installed] : []
+    const date = new Date().toISOString().slice(0, 10)
+    for (const r of records) {
+      const entry = { ref: r.ref, address: r.address, name: r.name, supplier: r.supplier, license: r.licence, date }
+      const i = entries.findIndex((e) => e === r.ref || (e && typeof e === 'object' && e.ref === r.ref))
+      if (i < 0) entries.push(entry)
+      else entries[i] = entries[i] && typeof entries[i] === 'object' ? { ...entries[i], ...entry } : entry
+    }
+    project.installed = entries
+    try {
+      fs.writeFileSync(at, JSON.stringify(project, null, 2) + '\n')
+    } catch {
+      notes.push('minerals.json could not be written, so this pull was not recorded in it.')
+    }
+  }
 
   // 6. The temporary files go.
   cleanUp()
 
-  // 7. The receipt: one line per listing, and the last line printed.
+  // 7. What there is to say, then the receipt: one line per listing, and the last line printed.
+  for (const note of notes) console.log(note)
   const byListing = new Map()
   for (const r of records) byListing.set(r.listing, [...(byListing.get(r.listing) || []), r])
-  for (const mine of byListing.values()) console.log(mine.length === 1 ? mine[0].receipt : mine[0].receipt_several.replace('<n>', String(mine.length)))
+  for (const mine of byListing.values()) console.log(shown(mine.length === 1 ? mine[0].receipt : String(mine[0].receipt_several).replace('<n>', String(mine.length))))
 }
 
 if (args[0] === 'add') {
