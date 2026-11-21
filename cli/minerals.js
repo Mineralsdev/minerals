@@ -36,13 +36,16 @@ async function get(url) {
   return Buffer.from(await res.arrayBuffer())
 }
 
-/** Where a registry file's entry goes in a project without components.json. Null when it would leave the project folder. */
+/** Where a registry file's entry goes in a project without components.json. Null when it would leave the project folder, or land in a dot folder, a dot file or node_modules. */
 function placeOf(file, root) {
   const named = String(file.target || file.path || '')
   const mapped = named.replace(/^~\//, '').replace(/^@components\//, 'components/').replace(/^@ui\//, 'components/ui/').replace(/^@lib\//, 'lib/').replace(/^@hooks\//, 'hooks/')
   if (!mapped) return null
   const full = path.resolve(root, mapped)
-  return full.startsWith(root + path.sep) ? full : null
+  if (!full.startsWith(root + path.sep)) return null
+  // Never into a folder or file whose name starts with a dot (.git, .github, .env), and never into node_modules.
+  const parts = path.relative(root, full).split(path.sep)
+  return parts.some((part) => part.startsWith('.') || part === 'node_modules') ? null : full
 }
 
 async function add() {
@@ -93,8 +96,9 @@ async function add() {
   // 4. Install.
   if (fs.existsSync(path.join(root, 'components.json'))) {
     const files = records.map((r) => `./${path.basename(r.temp)}`)
-    const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
-    const dry = spawnSync(npx, ['-y', 'shadcn@latest', 'add', ...files, '--dry-run'], { cwd: root, encoding: 'utf8' })
+    // On Windows npx is a .cmd file, which Node only starts through a shell. Every argument here is this command's own: fixed words and file names made from refs that passed the check above.
+    const shell = process.platform === 'win32'
+    const dry = spawnSync('npx', ['-y', 'shadcn@latest', 'add', ...files, '--dry-run'], { cwd: root, encoding: 'utf8', shell })
     if (dry.status !== 0) stop(1, 'The shadcn dry run failed, so nothing was installed.')
     // The dry run marks a file that exists and would be replaced with "~ <path> overwrite".
     const would = [...`${dry.stdout}\n${dry.stderr}`.matchAll(/~\s+(\S+)\s+overwrite/g)].map((m) => m[1])
@@ -103,7 +107,7 @@ async function add() {
       for (const f of would) console.log(`  ${f}`)
       stop(2, 'Nothing was installed; run again with --overwrite to replace them.')
     }
-    const run = spawnSync(npx, ['-y', 'shadcn@latest', 'add', ...files, '--yes', ...(overwrite ? ['--overwrite'] : [])], { cwd: root, stdio: 'inherit' })
+    const run = spawnSync('npx', ['-y', 'shadcn@latest', 'add', ...files, '--yes', ...(overwrite ? ['--overwrite'] : [])], { cwd: root, stdio: 'inherit', shell })
     if (run.status !== 0) stop(1, 'shadcn could not install the files.')
   } else {
     // Without components.json: the files each registry file names, never outside the project folder.
@@ -111,7 +115,7 @@ async function add() {
     for (const r of records) {
       for (const f of r.file.files || []) {
         const to = placeOf(f, root)
-        if (!to) stop(1, `${r.ref} names a file outside the project folder, so nothing was installed.`)
+        if (!to) stop(1, `${r.ref} names a file outside the project folder, in a dot folder or in node_modules, so nothing was installed.`)
         if (typeof f.content !== 'string') stop(1, `${r.ref} names a file without content, so nothing was installed.`)
         writes.push({ to, content: f.content })
       }
