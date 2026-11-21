@@ -41,11 +41,11 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
 /** A supplier's text as it may be printed: no control characters, 200 characters at most. */
 const shown = (text) => String(text).replace(/[\x00-\x1f\x7f-\x9f]/g, ' ').split(String.fromCharCode(0x2028)).join(' ').split(String.fromCharCode(0x2029)).join(' ').slice(0, 200)
 
-/** A plain npm package name: letters, digits, dots, hyphens and underscores, one optional @scope/ in front, an optional @version behind. */
-const PACKAGE = /^(@[A-Za-z0-9._-]+\/)?[A-Za-z0-9._-]+(@[A-Za-z0-9._-]+)?$/
-/** A plain https address: no spaces, quotes, backticks, $, ;, | or &, and no control characters. */
-const ADDRESS = /^https:\/\/[^\s"'`$;|&\x00-\x1f\x7f-\x9f]+$/
-const count = (n) => `${n} ${n === 1 ? 'name' : 'names'}`
+/** A plain npm package name: letters, digits, dots, hyphens and underscores, one optional @scope/ in front, an optional @version behind. The name, the scope and the version each start with a letter or a digit, so "--force" and "-g" are not names. */
+const PART = '[A-Za-z0-9][A-Za-z0-9._-]*'
+const PACKAGE = new RegExp(`^(@${PART}/)?${PART}(@${PART})?$`)
+/** A plain https address, every character from a list: the host in letters, digits, dots and hyphens, an optional port, and in the path and the query (after one "?") only letters, digits and . _ ~ % / + @ = , : - */
+const ADDRESS = /^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[A-Za-z0-9._~%\/+@=,:-]*)?(\?[A-Za-z0-9._~%\/+@=,:-]*)?$/
 
 /** One download, 20 seconds at most. A failure carries the status, or the reason in a few words. */
 async function get(url) {
@@ -192,9 +192,8 @@ async function add() {
     const packages = [...new Set(records.flatMap((r) => list(r.file.dependencies)))]
     // An agent will run this line in a shell: only a plain npm package name, with an optional version, is put on it.
     const named = packages.filter((n) => PACKAGE.test(n))
-    const notNames = packages.length - named.length
-    if (named.length) notes.push(`Still needed: npm install ${named.join(' ')}${notNames ? `, and ${count(notNames)} that ${notNames === 1 ? 'is not a package name' : 'are not package names'}` : ''}`)
-    else if (notNames) notes.push(`Still needed: ${count(notNames)} that ${notNames === 1 ? 'is not a package name' : 'are not package names'}`)
+    if (named.length) notes.push(`Still needed: npm install ${named.join(' ')}`)
+    if (named.length < packages.length) notes.push(`Not printed: ${packages.length - named.length} ${packages.length - named.length === 1 ? 'name that is not a package name' : 'names that are not package names'}.`)
     const listed = []
     const other = []
     await Promise.all(
@@ -216,8 +215,8 @@ async function add() {
     if (listed.length) notes.push(`Also needed: npx -y minerals@1 add ${listed.sort().join(' ')}`)
     // The same for an address: only a plain https address is printed.
     const plain = other.filter((a) => ADDRESS.test(a)).sort()
-    const notPlain = other.length - plain.length
-    if (plain.length || notPlain) notes.push(`Also needed, from the supplier: ${[...plain, ...(notPlain ? [`${plain.length ? 'and ' : ''}${notPlain} ${notPlain === 1 ? 'address that is' : 'addresses that are'} not plain https`] : [])].join(' ')}`)
+    if (plain.length) notes.push(`Also needed, from the supplier: ${plain.join(' ')}`)
+    if (plain.length < other.length) notes.push(`Not printed: ${other.length - plain.length} ${other.length - plain.length === 1 ? 'address that is not plain https' : 'addresses that are not plain https'}.`)
     notes.push(`Checked against Minerals' hash: ${checked}.`)
   }
 
