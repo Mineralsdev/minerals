@@ -30,7 +30,7 @@ Minerals is one MCP server for design work. Connect it once to Claude Code, Curs
 The quick way: paste this to your agent.
 
 ```
-Connect Minerals for all my projects: read https://minerals.dev/install.md and follow it, then suggest one free item for this project.
+Connect Minerals for all my projects: read https://minerals.dev/install.md and follow it.
 ```
 
 Or add the server yourself:
