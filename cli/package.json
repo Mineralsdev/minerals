@@ -1,6 +1,6 @@
 {
   "name": "minerals",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
   "bin": { "minerals": "minerals.js" },
   "files": ["minerals.js"],
