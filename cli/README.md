@@ -2,7 +2,7 @@
 
 One command that pulls a free item listed on [Minerals](https://minerals.dev) into your project.
 
-    npx -y minerals@1 add arc/hero-section
+    npx -y minerals add arc/hero-section
 
 It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it (through shadcn when the project has a `components.json`, otherwise by writing the files the registry file names), and records the pull under `installed` in `minerals.json`. The last line it prints is the receipt.
 

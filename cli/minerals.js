@@ -3,8 +3,8 @@
 // the item's record from minerals.dev, the file through its pull address (or the supplier's own on failure), and,
 // in a project with components.json, what shadcn itself fetches.
 //
-//   npx minerals                      what Minerals is, and where to connect it
-//   npx minerals add <ref> [<ref>…]   pull one or several items, e.g. arc/hero-section
+//   npx -y minerals                   what Minerals is, and where to connect it
+//   npx -y minerals add <ref> [<ref>…]   pull one or several items, e.g. arc/hero-section
 //     --overwrite        replace files that already exist
 //     --allow-changed    go on although a file differs from the hash Minerals recorded
 //
@@ -90,7 +90,7 @@ async function add() {
   const overwrite = args.includes('--overwrite')
   const allowChanged = args.includes('--allow-changed')
   const refs = [...new Set(args.slice(1).filter((a) => !a.startsWith('--')).map((r) => r.toLowerCase()))]
-  if (!refs.length) stop(1, 'Name at least one ref, for example: npx minerals add arc/hero-section')
+  if (!refs.length) stop(1, 'Name at least one ref, for example: npx -y minerals add arc/hero-section')
   const root = process.cwd()
   const notes = []
 
@@ -219,7 +219,7 @@ async function add() {
         }
       }),
     )
-    if (listed.length) notes.push(`Also needed: npx -y minerals@1 add ${listed.sort().join(' ')}`)
+    if (listed.length) notes.push(`Also needed: npx -y minerals add ${listed.sort().join(' ')}`)
     // The same for an address: only a plain https address is printed.
     const plain = other.filter((a) => ADDRESS.test(a)).sort()
     if (plain.length) notes.push(`Also needed, from the supplier: ${plain.join(' ')}`)

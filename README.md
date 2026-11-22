@@ -120,7 +120,7 @@ After a pull your agent says one line, the receipt: "Added <item> from <listing>
 An item that is pulled as a registry file comes with one command:
 
 ```bash
-npx -y minerals@1 add arc/hero-section
+npx -y minerals add arc/hero-section
 ```
 
 It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it, and records the pull under `installed` in `minerals.json`. It never replaces a file that exists unless it is run with `--overwrite`, and it stops when a file has changed since it was checked unless it is run with `--allow-changed`. Its source is in [`cli/`](cli).
