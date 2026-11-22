@@ -86,6 +86,17 @@ function placeOf(file, root) {
 /** Whether something is at a path. A symlink counts, also one that points nowhere. */
 const isThere = (p) => !!fs.lstatSync(p, { throwIfNoEntry: false })
 
+/** Whether a regular file (not a symlink) is at a path and holds exactly this content. Such a file is already there: it is not a change. */
+function isSame(p, content) {
+  const at = fs.lstatSync(p, { throwIfNoEntry: false })
+  if (!at || !at.isFile()) return false
+  try {
+    return fs.readFileSync(p).equals(Buffer.from(content))
+  } catch {
+    return false
+  }
+}
+
 async function add() {
   const overwrite = args.includes('--overwrite')
   const allowChanged = args.includes('--allow-changed')
@@ -156,13 +167,26 @@ async function add() {
     // The dry run of this shadcn version lists what it would do under "Files (n)". Without that, its answer is not trusted.
     if (!/Files \(\d+\)/.test(said)) stop(1, `shadcn's answer could not be read, so nothing was installed. The steps are at ${SITE}/${records[0].asked}.md`)
     // It marks a file that exists and would be replaced with "~ <path> overwrite".
-    const would = said.split('\n').map((line) => line.match(/~\s+(.+?)\s+overwrite\b/)).filter(Boolean).map((m) => m[1])
+    const marked = said.split('\n').map((line) => line.match(/~\s+(.+?)\s+overwrite\b/)).filter(Boolean).map((m) => m[1])
+    // Of those, a file of a ref that was asked for, at the place it names, that already holds the incoming content is not a change. What shadcn pulls in itself is judged as before.
+    const incoming = new Map()
+    for (const r of records) {
+      for (const f of Array.isArray(r.file.files) ? r.file.files : []) {
+        const to = f && typeof f === 'object' && f.target && typeof f.content === 'string' ? placeOf(f, root) : null
+        if (to) incoming.set(to, f.content)
+      }
+    }
+    const same = marked.filter((f) => incoming.has(path.resolve(root, f)) && isSame(path.resolve(root, f), incoming.get(path.resolve(root, f))))
+    for (const f of same) console.log(`Already there: ${shown(f)}`)
+    const would = marked.filter((f) => !same.includes(f))
     if (would.length && !overwrite) {
       console.log('These files exist and would change:')
       for (const f of would) console.log(`  ${shown(f)}`)
       stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
     }
-    const run = spawnSync('npx', ['-y', SHADCN, 'add', ...files, '--yes', ...(overwrite ? ['--overwrite'] : [])], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'], shell, timeout: 300000 })
+    // shadcn asks about every file that exists, also one that would not change, and nobody is there to answer. When all that is left are files
+    // that already hold the incoming content, it is told to write them: the same bytes over the same bytes.
+    const run = spawnSync('npx', ['-y', SHADCN, 'add', ...files, '--yes', ...(overwrite || same.length ? ['--overwrite'] : [])], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'], shell, timeout: 300000 })
     if (run.error && run.error.code === 'ETIMEDOUT') stop(1, 'shadcn did not finish in 5 minutes. Look at what it wrote before running again.')
     if (run.status !== 0) stop(1, 'shadcn could not install the files.')
     notes.push(`Checked against Minerals' hash: ${checked}.${pulledIn.length ? ` Not checked: ${pulledIn.length} ${pulledIn.length === 1 ? 'file' : 'files'} it pulls in.` : ''}`)
@@ -179,16 +203,18 @@ async function add() {
         const to = f && typeof f === 'object' ? placeOf(f, root) : null
         if (!to) stop(1, `${r.asked} names a file outside the project folder, in a dot folder or in node_modules, so nothing was installed.`)
         if (typeof f.content !== 'string') stop(1, `${r.asked} names a file without content, so nothing was installed.`)
-        writes.push({ to, content: f.content })
+        writes.push({ to, content: f.content, same: isSame(to, f.content) })
       }
     }
-    const exist = writes.filter((w) => isThere(w.to)).map((w) => path.relative(root, w.to))
+    for (const w of writes) if (w.same) console.log(`Already there: ${shown(path.relative(root, w.to))}`)
+    const exist = writes.filter((w) => !w.same && isThere(w.to)).map((w) => path.relative(root, w.to))
     if (exist.length && !overwrite) {
       console.log('These files exist and would change:')
       for (const f of exist) console.log(`  ${shown(f)}`)
       stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
     }
     for (const w of writes) {
+      if (w.same) continue
       fs.mkdirSync(path.dirname(w.to), { recursive: true })
       // A symlink at the place is replaced by the file, never written through.
       if (isThere(w.to)) fs.rmSync(w.to, { force: true })
