@@ -43,7 +43,9 @@ const shown = (text) => String(text).replace(/[\x00-\x1f\x7f-\x9f]/g, ' ').split
 
 /** A plain npm package name: letters, digits, dots, hyphens and underscores, one optional @scope/ in front, an optional @version behind. The name, the scope and the version each start with a letter or a digit, so "--force" and "-g" are not names. */
 const PART = '[A-Za-z0-9][A-Za-z0-9._-]*'
-const PACKAGE = new RegExp(`^(@${PART}/)?${PART}(@${PART})?$`)
+// A version may begin with ^ or ~ ("@base-ui/react@^1.9.0"). Such a name is printed in double quotes, so a shell reads it as one word.
+const PACKAGE = new RegExp(`^(@${PART}/)?${PART}(@[~^]?${PART})?$`)
+const quoted = (name) => (/[~^]/.test(name) ? `"${name}"` : name)
 /** A plain https address, every character from a list: the host in letters, digits, dots and hyphens, an optional port, and in the path and the query (after one "?") only letters, digits and . _ ~ % / + @ = , : - */
 const ADDRESS = /^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?(\/[A-Za-z0-9._~%\/+@=,:-]*)?(\?[A-Za-z0-9._~%\/+@=,:-]*)?$/
 
@@ -166,6 +168,11 @@ async function add() {
     notes.push(`Checked against Minerals' hash: ${checked}.${pulledIn.length ? ` Not checked: ${pulledIn.length} ${pulledIn.length === 1 ? 'file' : 'files'} it pulls in.` : ''}`)
   } else {
     // Without components.json: the files each registry file names, never outside the project folder.
+    // A file with no fixed destination is placed by shadcn, by its type. Written by hand it would land in the supplier's own
+    // folder, where nothing finds it: such an item needs a shadcn project, and nothing is written.
+    if (records.some((r) => (Array.isArray(r.file.files) ? r.file.files : []).some((f) => f && typeof f === 'object' && !f.target))) {
+      stop(1, 'This item needs a shadcn project. Run npx shadcn@latest init first, then run this again.')
+    }
     const writes = []
     for (const r of records) {
       for (const f of Array.isArray(r.file.files) ? r.file.files : []) {
@@ -192,7 +199,7 @@ async function add() {
     const packages = [...new Set(records.flatMap((r) => list(r.file.dependencies)))]
     // An agent will run this line in a shell: only a plain npm package name, with an optional version, is put on it.
     const named = packages.filter((n) => PACKAGE.test(n))
-    if (named.length) notes.push(`Still needed: npm install ${named.join(' ')}`)
+    if (named.length) notes.push(`Still needed: npm install ${named.map(quoted).join(' ')}`)
     if (named.length < packages.length) notes.push(`Not printed: ${packages.length - named.length} ${packages.length - named.length === 1 ? 'name that is not a package name' : 'names that are not package names'}.`)
     const listed = []
     const other = []
