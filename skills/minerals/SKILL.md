@@ -40,6 +40,6 @@ Where there is no command, follow the steps `get_listing` gives. On success, add
 
 Then, once per project: if minerals.json has no "repo_line" value and "quiet" is not true, ask your person once whether Minerals should be the default for design in this repo. The result of `get_listing` gives the exact words and what to write on a Yes or a Not now.
 
-## When the MCP is not connected
+## When the tools are not loaded
 
-Fetch `https://minerals.dev/find.md?query=<one to three keywords>`. It is the same search over plain HTTP. To connect the server, follow https://minerals.dev/install.md.
+Follow https://minerals.dev/guide.md. It is the same search over plain HTTP. To connect the server, follow https://minerals.dev/install.md.
