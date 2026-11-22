@@ -83,15 +83,21 @@ npx shadcn@latest add Mineralsdev/minerals/connect
 
 | Listing | Maker | Best for |
 |---|---|---|
-| <a href="https://www.blossom-carousel.com/"><img src="https://minerals.dev/images/logos/blossom-carousel.png" width="20" height="20" alt=""> Blossom Carousel</a> | Jesper Vos | A carousel that keeps the browser's own scrolling and adds dragging with a mouse. Layout, snapping and spacing stay in your CSS. |
+| <a href="https://audio.raphaelsalaja.com/"><img src="https://minerals.dev/images/logos/web-kits-audio.png" width="20" height="20" alt=""> @web-kits/audio</a> | Raphael Salaja | Interface sounds made in code. |
+| <a href="https://www.agentation.com/"><img src="https://minerals.dev/images/logos/agentation.png" width="20" height="20" alt=""> Agentation</a> | Benji Taylor, Dennis Jin and Alex Vanderzon | Point at the interface for your agent. |
+| <a href="https://www.blossom-carousel.com/"><img src="https://minerals.dev/images/logos/blossom-carousel.png" width="20" height="20" alt=""> Blossom Carousel</a> | Jesper Vos | A carousel with native scrolling. |
 | <a href="https://www.details.so/"><img src="https://minerals.dev/images/logos/details-so.png" width="20" height="20" alt=""> Details.so</a> | Details.so | Page transitions, parallax, small interface details. |
 | <a href="https://www.dialkit.dev"><img src="https://minerals.dev/images/logos/dialkit.png" width="20" height="20" alt=""> DialKit</a> | Josh Puckett | Tuning spacing, motion and colour live beside the interface. |
-| <a href="https://www.fluidfunctionalism.com"><img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="20" height="20" alt=""> Fluid Functionalism</a> | Micka | Refined product interfaces with one consistent hover feel across buttons, tables, dialogs and sidebars. |
+| <a href="https://www.easing.dev/"><img src="https://minerals.dev/images/logos/easing-dev.png" width="20" height="20" alt=""> Easing.dev</a> | Lochie Axon and Alex Vanderzon | Choosing an easing curve by its graph, with the value ready for CSS, Motion, SwiftUI and UIKit. |
+| <a href="https://www.fluidfunctionalism.com"><img src="https://minerals.dev/images/logos/fluid-functionalism.png" width="20" height="20" alt=""> Fluid Functionalism</a> | Micka | Product interfaces with one hover feel. |
 | <a href="https://libraries.dev/"><img src="https://minerals.dev/images/logos/libraries-dev.png" width="20" height="20" alt=""> Libraries.dev</a> | Jakub Antalik | Effects for AI interfaces in React: a glowing border while it streams, thinking orbs while it works, and voice and avatar pieces. |
+| <a href="https://corne.rs/"><img src="https://minerals.dev/images/logos/lisse.png" width="20" height="20" alt=""> Lisse</a> | Jace Attard | Squircle corners like Figma and iOS, with borders and shadows that follow the curve. |
+| <a href="https://skullet.lochie.me/"><img src="https://minerals.dev/images/logos/skullet.png" width="20" height="20" alt=""> Skullet</a> | Lochie Axon | Loading states from your components. |
 | <a href="https://sticky.jesperlandberg.com/"><img src="https://minerals.dev/images/logos/sticky.png" width="20" height="20" alt=""> Sticky Scroll</a> | Jesper Landberg | Sticky elements that ease into place and out again instead of stopping dead. One file, no dependencies. |
 | <a href="https://textures.dev/"><img src="https://minerals.dev/images/logos/textures.png" width="20" height="20" alt=""> Textures.dev</a> | Textures.dev | Animated, hover-reactive brand textures for websites. Each one is a single React component that coding agents like Claude Code, Cursor and Codex add to your project with one prompt. |
 | <a href="https://twombly.app"><img src="https://minerals.dev/images/logos/twombly.png" width="20" height="20" alt=""> Twombly</a> | Materic, Inc. | Sharing a prototype or an agent's design explorations with other people to compare, review and give feedback on a shared canvas. |
-| <a href="https://uiarc.dev/"><img src="https://minerals.dev/images/logos/arc.png" width="20" height="20" alt=""> UIArc</a> | Elia Kuratli | Animated components and blocks for marketing pages on shadcn and Next.js. |
+| <a href="https://uiarc.dev/"><img src="https://minerals.dev/images/logos/arc.png" width="20" height="20" alt=""> UIArc</a> | Elia Kuratli | Sections and app screens in one style. |
+| <a href="https://haptics.lochie.me/"><img src="https://minerals.dev/images/logos/web-haptics.png" width="20" height="20" alt=""> WebHaptics</a> | Lochie Axon | Haptic feedback on the mobile web, on Android. |
 
 The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 
