@@ -185,7 +185,7 @@ async function add() {
       stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
     }
     // shadcn asks about every file that exists, also one that would not change, and nobody is there to answer. When all that is left are files
-    // that already hold the incoming content, it is told to write them: the same bytes over the same bytes.
+    // that already hold the incoming content, it is told to write them: the same file again, in the form shadcn gives it.
     const run = spawnSync('npx', ['-y', SHADCN, 'add', ...files, '--yes', ...(overwrite || same.length ? ['--overwrite'] : [])], { cwd: root, stdio: ['ignore', 'inherit', 'inherit'], shell, timeout: 300000 })
     if (run.error && run.error.code === 'ETIMEDOUT') stop(1, 'shadcn did not finish in 5 minutes. Look at what it wrote before running again.')
     if (run.status !== 0) stop(1, 'shadcn could not install the files.')
