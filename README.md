@@ -77,7 +77,7 @@ npx shadcn@latest add Mineralsdev/minerals/connect
 2. **The request is routed.** It goes to the listings that fit the task. At most three come back, best first.
 3. **You say yes.** The agent asks once, in one line.
 4. **The file comes from its maker.** Minerals never holds it.
-5. **Then it stays out of the way.** At most one offer per session, and "Not now" is remembered.
+5. **It only runs when it is needed.** At most one offer per session, and "Not now" is remembered.
 
 ## On the shelf
 
@@ -113,7 +113,7 @@ The live shelf, with every item, is at [minerals.dev](https://minerals.dev).
 
 A search takes up to three needs, separated by commas. `get_listing` takes up to eight refs, separated by commas. A report is only for a pull that was not used after all: a pull that went through needs none.
 
-After a pull your agent says one line, the receipt: "Added <item> from <listing> by <maker>. Via Minerals." Once per project it then asks whether Minerals should be the default for design in the repo. Yes adds one line to the repo's agent file; Not now is remembered.
+After a pull your agent says one line, the receipt: "Added <item> from <listing> by <maker> (@handle). Via Minerals." Once per project it then asks whether Minerals should be the default for design in the repo. Yes adds one line to the repo's agent file; Not now is remembered.
 
 ## The command
 
@@ -123,7 +123,7 @@ An item that is pulled as a registry file comes with one command:
 npx -y minerals add arc/hero-section
 ```
 
-It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it, and records the pull under `installed` in `minerals.json`. It never replaces a file that exists unless it is run with `--overwrite`, and it stops when a file has changed since it was checked unless it is run with `--allow-changed`. Its source is in [`cli/`](cli).
+It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it, and records the pull under `installed` in `minerals.json`. It never replaces a file that exists unless it is run with `--overwrite`, and it stops when a file has changed since it was checked unless it is run with `--allow-changed`. A file that is already there and identical is not a change. Its source is in [`cli/`](cli).
 
 ## What is sent, what is fetched
 

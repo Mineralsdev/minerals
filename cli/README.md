@@ -6,7 +6,7 @@ One command that pulls a free item listed on [Minerals](https://minerals.dev) in
 
 It reads the item's record from minerals.dev, downloads the file from its supplier, checks it against the hash Minerals recorded, installs it (through shadcn when the project has a `components.json`, otherwise by writing the files the registry file names), and records the pull under `installed` in `minerals.json`. The last line it prints is the receipt.
 
-Flags: `--overwrite` replaces files that already exist; `--allow-changed` goes on although a file differs from the recorded hash.
+Flags: `--overwrite` replaces files that already exist; `--allow-changed` goes on although a file differs from the recorded hash. A file that is already there and identical is not a change.
 
 Exit codes: 0 done, 1 could not be done, 2 files that exist would change, 3 a file has changed since it was checked.
 
