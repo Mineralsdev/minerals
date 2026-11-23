@@ -127,7 +127,7 @@ It reads the item's record from minerals.dev, downloads the file from its suppli
 
 ## What is sent, what is fetched
 
-What is sent: a few keywords, any filter you set (section, listing, kind, free only), stack names, one project type and stage label, the moment the work is at, the refs and settings already in minerals.json (what is installed, what was accepted or declined, and quiet), whether your person asked to replace something, your client's name, the install key when the connect line carries one, and which path asked (for example, the install guide's first run). No code, files or repo name.
+What is sent: a few keywords, any filter you set (section, listing, kind, free only), stack names, one project type and stage label, the moment the work is at, the refs and settings already in minerals.json (what is installed, what was accepted or declined, and quiet), whether your person asked to replace something, your client's name, the install key when the connect line carries one, which path asked (for example, the install guide's first run), and the answer to an offer given through Minerals (yes or not now, and for what). No code, files or repo name.
 
 Nothing is pulled without a yes. On a yes, the file comes straight from its supplier. Minerals never holds it. A pull goes through a Minerals address that records it and redirects to the supplier. More in the [privacy policy](https://minerals.dev/privacy).
 
