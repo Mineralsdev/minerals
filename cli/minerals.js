@@ -83,6 +83,10 @@ function placeOf(file, root) {
   return real === realRoot || real.startsWith(realRoot + path.sep) ? full : null
 }
 
+/** Said with exit code 2, after the files that exist and would change. */
+const EXISTS =
+  "Nothing was installed. A file the project's set-up created in this same task, which your person has not touched, may be replaced: run it again with --overwrite without asking. Any other file: name it to your person and ask. Never build something else in place of what they chose. If you cannot ask, stop and say why."
+
 /** Whether something is at a path. A symlink counts, also one that points nowhere. */
 const isThere = (p) => !!fs.lstatSync(p, { throwIfNoEntry: false })
 
@@ -184,7 +188,7 @@ async function add() {
     if (would.length && !overwrite) {
       console.log('These files exist and would change:')
       for (const f of would) console.log(`  ${shown(f)}`)
-      stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
+      stop(2, EXISTS)
     }
     // shadcn asks about every file that exists, also one that would not change, and nobody is there to answer. When all that is left are files
     // that already hold the incoming content, it is told to write them: the same file again, in the form shadcn gives it.
@@ -201,7 +205,7 @@ async function add() {
       const files = Array.isArray(r.file.files) ? r.file.files : []
       return files.some((f) => f && typeof f === 'object' && !f.target) || (!files.length && (r.file.cssVars || r.file.css))
     })
-    if (needs) stop(1, `This item needs a shadcn project. Set one up as ${SITE}/${needs.asked}.md says, then run this again.`)
+    if (needs) stop(1, `This item needs a shadcn project. Set one up as ${SITE}/${needs.asked}.md says under "No project in this folder yet", then run this again.`)
     const writes = []
     for (const r of records) {
       for (const f of Array.isArray(r.file.files) ? r.file.files : []) {
@@ -216,7 +220,7 @@ async function add() {
     if (exist.length && !overwrite) {
       console.log('These files exist and would change:')
       for (const f of exist) console.log(`  ${shown(f)}`)
-      stop(2, 'Nothing was installed. Ask your person before running again with --overwrite.')
+      stop(2, EXISTS)
     }
     for (const w of writes) {
       if (w.same) continue
