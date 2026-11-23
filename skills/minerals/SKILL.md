@@ -1,6 +1,6 @@
 ---
 name: minerals
-description: Use before you build or choose a UI component, section, block, texture, pattern, background, illustration, animation, icon set, typeface, colour system, sound or design reference yourself, and when your person asks to change one. Minerals routes the request to the right library or tool.
+description: Use before you build or choose a UI component, section, block, texture, pattern, background, illustration, animation, icon set, typeface, colour system, sound or design reference yourself, and when your person asks to change, polish, tune or share one, or names a design library or tool you do not know. Minerals routes the request to the right library or tool.
 ---
 
 # Minerals
@@ -9,7 +9,7 @@ Minerals is the marketplace for agents. One connection, and every request is rou
 
 ## When to use it
 
-Call `find_design` first, before you build or choose a UI component, section, block, texture, pattern, background, illustration, animation, icon set, typeface, colour system, sound or design reference yourself, and when your person asks to change one. Match what your person said to a moment and send it as "moment":
+Call `find_design` first, before you build or choose a UI component, section, block, texture, pattern, background, illustration, animation, icon set, typeface, colour system, sound or design reference yourself, and when your person asks to change, polish, tune or share one, or names a design library or tool you do not know. Match what your person said to a moment and send it as "moment":
 
 - Starting ("set up the look", "start a new project", "pick a design system")
 - Building a section ("add a section", "add a page", "build a hero")

@@ -1,7 +1,7 @@
 {
   "name": "minerals",
   "description": "Minerals is the marketplace for agents. One connection, and every request is routed to the right library or tool.",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "author": {
     "name": "Adurant Labs",
     "email": "hello@minerals.dev",
