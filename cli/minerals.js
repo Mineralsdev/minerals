@@ -165,7 +165,9 @@ async function add() {
     if (dry.status !== 0) stop(1, 'The shadcn dry run failed, so nothing was installed.')
     const said = `${dry.stdout}\n${dry.stderr}`
     // The dry run of this shadcn version lists what it would do under "Files (n)". Without that, its answer is not trusted.
-    if (!/Files \(\d+\)/.test(said)) stop(1, `shadcn's answer could not be read, so nothing was installed. The steps are at ${SITE}/${records[0].asked}.md`)
+    // A theme item lists no files, only CSS variables, and the dry run then lists none either: there is nothing to overwrite, and shadcn installs it.
+    const noFiles = records.every((r) => !(Array.isArray(r.file.files) && r.file.files.length))
+    if (!/Files \(\d+\)/.test(said) && !noFiles) stop(1, `shadcn's answer could not be read, so nothing was installed. The steps are at ${SITE}/${records[0].asked}.md`)
     // It marks a file that exists and would be replaced with "~ <path> overwrite".
     const marked = said.split('\n').map((line) => line.match(/~\s+(.+?)\s+overwrite\b/)).filter(Boolean).map((m) => m[1])
     // Of those, a file of a ref that was asked for, at the place it names, that already holds the incoming content is not a change. What shadcn pulls in itself is judged as before.
@@ -194,9 +196,12 @@ async function add() {
     // Without components.json: the files each registry file names, never outside the project folder.
     // A file with no fixed destination is placed by shadcn, by its type. Written by hand it would land in the supplier's own
     // folder, where nothing finds it: such an item needs a shadcn project, and nothing is written.
-    if (records.some((r) => (Array.isArray(r.file.files) ? r.file.files : []).some((f) => f && typeof f === 'object' && !f.target))) {
-      stop(1, 'This item needs a shadcn project. Run npx shadcn@latest init first, then run this again.')
-    }
+    // The same for an item with no files that carries CSS variables: only shadcn can add those. How to set a project up depends on the listing, so its page says it.
+    const needs = records.find((r) => {
+      const files = Array.isArray(r.file.files) ? r.file.files : []
+      return files.some((f) => f && typeof f === 'object' && !f.target) || (!files.length && (r.file.cssVars || r.file.css))
+    })
+    if (needs) stop(1, `This item needs a shadcn project. Set one up as ${SITE}/${needs.asked}.md says, then run this again.`)
     const writes = []
     for (const r of records) {
       for (const f of Array.isArray(r.file.files) ? r.file.files : []) {
